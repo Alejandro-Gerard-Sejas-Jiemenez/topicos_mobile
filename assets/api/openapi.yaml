@@ -153,15 +153,7 @@ paths:
         '200':
           description: OK
           
-  /inventario/disminuir_stock:
-    put:
-      operationId: disminuirStockProducto
-      summary: "params: {id: int, cantidad: int}"
-      x-google-backend:
-        address: https://serverlest-topicos-gateway-8zoia048.uc.gateway.dev/disminuir_stock
-      responses:
-        '200':
-          description: OK      
+
 
   /venta/crear:
     post:

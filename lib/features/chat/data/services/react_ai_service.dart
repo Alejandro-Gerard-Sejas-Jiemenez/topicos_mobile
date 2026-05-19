@@ -52,61 +52,76 @@ $history
   }) async {
     // 1. Añadir el mensaje del usuario a la memoria
     memory.addMessage(MemoryMessage(role: MemoryRole.user, content: userInput));
-    
+
     int loopCount = 0;
     const maxLoops = 3; // Evitar bucles infinitos
-    
+
     String finalResponse = "No pude procesar la solicitud.";
 
     while (loopCount < maxLoops) {
       loopCount++;
       onProgress?.call("Pensando (Paso $loopCount)...");
-      
-      final prompt = await _getPrompt(userInput); // userInput here is just to show in the prompt, but actually history has it. Let's adjust prompt to use history mostly.
+
+      final prompt = await _getPrompt(
+        userInput,
+      ); // userInput here is just to show in the prompt, but actually history has it. Let's adjust prompt to use history mostly.
       final response = await _llama.generate(prompt);
-      
+
       print("--- RESPUESTA GEMMA (Ciclo $loopCount) ---");
       print(response);
       print("----------------------------------");
 
       final actions = _cleanAndParseResponse(response);
-      
+
       if (actions.isNotEmpty) {
-         // La IA decidió ejecutar herramientas
-         memory.addMessage(MemoryMessage(role: MemoryRole.action, content: jsonEncode(actions)));
-         
-         onProgress?.call("Ejecutando ${actions.length} acción(es)...");
-         
-         final List<String> observations = [];
-         for (var action in actions) {
-            final obs = await _executor.executeAction(action as Map<String, dynamic>);
-            observations.add(obs);
-         }
-         
-         final obsText = observations.join("\n");
-         memory.addMessage(MemoryMessage(role: MemoryRole.observation, content: obsText));
-         
-         // El ciclo se repite para que la IA lea la observación y decida el siguiente paso
-         continue;
+        // La IA decidió ejecutar herramientas
+        memory.addMessage(
+          MemoryMessage(role: MemoryRole.action, content: jsonEncode(actions)),
+        );
+
+        onProgress?.call("Ejecutando ${actions.length} acción(es)...");
+
+        final List<String> observations = [];
+        for (var action in actions) {
+          final obs = await _executor.executeAction(
+            action as Map<String, dynamic>,
+          );
+          observations.add(obs);
+        }
+
+        final obsText = observations.join("\n");
+        memory.addMessage(
+          MemoryMessage(role: MemoryRole.observation, content: obsText),
+        );
+
+        // El ciclo se repite para que la IA lea la observación y decida el siguiente paso
+        continue;
       } else {
-         // La IA respondió con texto normal (respuesta final)
-         String cleanedText = response.trim();
-         // Limpiar posibles etiquetas residuales
-         cleanedText = cleanedText.replaceAll("<start_of_turn>model\n", "").replaceAll("<end_of_turn>", "");
-         
-         if (cleanedText.isEmpty) {
-            cleanedText = "Tarea completada.";
-         }
-         
-         memory.addMessage(MemoryMessage(role: MemoryRole.assistant, content: cleanedText));
-         finalResponse = cleanedText;
-         break; // Fin del ciclo
+        // La IA respondió con texto normal (respuesta final)
+        String cleanedText = response.trim();
+        // Limpiar posibles etiquetas residuales
+        cleanedText = cleanedText
+            .replaceAll("<start_of_turn>model\n", "")
+            .replaceAll("<end_of_turn>", "");
+
+        if (cleanedText.isEmpty) {
+          cleanedText = "Tarea completada.";
+        }
+
+        memory.addMessage(
+          MemoryMessage(role: MemoryRole.assistant, content: cleanedText),
+        );
+        finalResponse = cleanedText;
+        break; // Fin del ciclo
       }
     }
 
     if (loopCount >= maxLoops) {
-      finalResponse = "He alcanzado el límite de operaciones. Revisa los resultados.";
-      memory.addMessage(MemoryMessage(role: MemoryRole.assistant, content: finalResponse));
+      finalResponse =
+          "He alcanzado el límite de operaciones. Revisa los resultados.";
+      memory.addMessage(
+        MemoryMessage(role: MemoryRole.assistant, content: finalResponse),
+      );
     }
 
     return finalResponse;

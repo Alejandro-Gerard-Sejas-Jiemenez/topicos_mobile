@@ -41,26 +41,44 @@ class ActionExecutor {
     }
   }
 
-  // Resumir el JSON para no agotar los tokens de la memoria
+  // Resumir el JSON de forma compacta e inteligente para no agotar tokens de memoria
   String _summarizeSuccess(String rawResponse, String? operation) {
     try {
       final decoded = jsonDecode(rawResponse);
       
-      // Intentar extraer campos clave si existen
       if (decoded is Map) {
         String summary = "Éxito.";
-        if (decoded.containsKey('message')) summary += " Mensaje: ${decoded['message']}.";
+        if (decoded.containsKey('message')) {
+          summary += " Mensaje: ${decoded['message']}.";
+        }
         
-        // Si hay una data anidada (ej. un objeto creado)
-        if (decoded.containsKey('data')) {
-           final data = decoded['data'];
-           if (data is Map && data.containsKey('id')) {
-              summary += " ID generado/afectado: ${data['id']}.";
-           } else if (data is List) {
-              summary += " Se obtuvieron ${data.length} registros.";
-           }
-        } else if (decoded.containsKey('id')) {
-           summary += " ID: ${decoded['id']}.";
+        // Extraer los datos reales del payload
+        dynamic content = decoded.containsKey('data') ? decoded['data'] : decoded;
+
+        if (content is List) {
+          final compactList = content.map((item) {
+            if (item is Map) {
+              // Mantener solo los campos representativos filtrando metadatos temporales
+              final cleanItem = Map.from(item)..removeWhere((k, v) => 
+                k.toString().contains('created_at') || 
+                k.toString().contains('updated_at')
+              );
+              return cleanItem.toString();
+            }
+            return item.toString();
+          }).toList();
+          
+          summary += " Datos obtenidos (${content.length} registros): $compactList";
+        } else if (content is Map) {
+          final cleanItem = Map.from(content)..removeWhere((k, v) => 
+            k.toString().contains('created_at') || 
+            k.toString().contains('updated_at')
+          );
+          summary += " Datos: $cleanItem";
+        } else {
+          if (decoded.containsKey('id')) {
+             summary += " ID: ${decoded['id']}.";
+          }
         }
         
         return summary;
@@ -70,7 +88,7 @@ class ActionExecutor {
     } catch (_) {
       // Si no es JSON pero fue exitoso
       if (rawResponse.trim().isEmpty) return "Acción ejecutada con éxito.";
-      return "Éxito. Respuesta: ${rawResponse.length > 50 ? rawResponse.substring(0, 50) + '...' : rawResponse}";
+      return "Éxito. Respuesta: ${rawResponse.length > 80 ? rawResponse.substring(0, 80) + '...' : rawResponse}";
     }
   }
 
