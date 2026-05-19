@@ -1,0 +1,194 @@
+swagger: '2.0'
+info:
+  title: topicos-api-gateway
+  description: Api de gateway para gestionar las rutas de los microservicios
+  version: 1.0.0
+
+schemes:
+  - https
+
+paths:
+  /usuario/listar:
+    get:
+      operationId: listarUsuarios
+      summary: "params: {}"
+      x-google-backend:
+        address: https://serverlest-topicos-gateway-8zoia048.uc.gateway.dev/listar_usuarios
+      responses:
+        '200':
+          description: OK
+
+  /usuario/crear:
+    post:
+      operationId: crearUsuario
+      summary: "params: {nombre: string, correo: string}"
+      x-google-backend:
+        address: https://serverlest-topicos-gateway-8zoia048.uc.gateway.dev/crear_usuario
+      responses:
+        '200':
+          description: OK
+  
+  /usuario/actualizar:
+    put:
+      operationId: actualizarUsuario
+      summary: "params: {id: int, nombre: string, correo: string}"
+      x-google-backend:
+        address: https://serverlest-topicos-gateway-8zoia048.uc.gateway.dev/actualizar_usuario
+      responses:
+        '200':
+          description: OK
+  
+  /usuario/obtener/{id}:
+    get:
+      operationId: obtenerUsuario
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+      x-google-backend:
+        address: https://serverlest-topicos-gateway-8zoia048.uc.gateway.dev/obtener_usuario
+      responses:
+        '200':
+          description: OK
+
+  /compra/crear:
+    post:
+      operationId: crearCompra
+      summary: "params: {id_usuario: int, total: number, fecha: string}"
+      x-google-backend:
+        address: https://serverlest-topicos-gateway-8zoia048.uc.gateway.dev/crear_compra
+      responses:
+        '201':
+          description: Created
+  
+  /detalle_compra/crear:
+    post:
+      operationId: crearDetalleCompra
+      summary: "params: {id_compra: int, id_producto: int, cantidad: int, precio_unitario: number}"
+      x-google-backend:
+        address: https://serverlest-topicos-gateway-8zoia048.uc.gateway.dev/crear_detalle_compra
+      responses:
+        '201':
+          description: Created
+  
+  /compra/listar/{id}:
+    get:
+      operationId: listarCompras
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+      x-google-backend:
+        address: https://serverlest-topicos-gateway-8zoia048.uc.gateway.dev/listar_compras
+      responses:
+        '200':
+          description: OK
+
+  /detalle_compra/listar/{id}:
+    get:
+      operationId: listarDetalleCompra
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+      x-google-backend:
+        address: https://serverlest-topicos-gateway-8zoia048.uc.gateway.dev/listar_detalle_compra
+      responses:
+        '200':
+          description: OK
+
+  /inventario/crear:
+    post:
+      operationId: crearProducto
+      summary: "params: {nombre: string, precio: number, stock: int}"
+      x-google-backend:
+        address: https://serverlest-topicos-gateway-8zoia048.uc.gateway.dev/crear_producto
+      responses:
+        '201':
+          description: Created
+  
+  /inventario/disminuir_stock:
+    put:
+      operationId: disminuirStockProducto
+      summary: "params: {id: int, cantidad: int}"
+      x-google-backend:
+        address: https://serverlest-topicos-gateway-8zoia048.uc.gateway.dev/disminuir_stock
+      responses:
+        '200':
+          description: OK
+  
+  /inventario/obtener/{id}:
+    get:
+      operationId: obtenerProducto
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+      x-google-backend:
+        address: https://serverlest-topicos-gateway-8zoia048.uc.gateway.dev/obtener_producto
+      responses:
+        '200':
+          description: OK
+  
+  /inventario/listar:
+    get:
+      operationId: listarProductos
+      x-google-backend:
+        address: https://serverlest-topicos-gateway-8zoia048.uc.gateway.dev/listar_productos
+      responses:
+        '200':
+          description: OK
+
+  /inventario/aumentar_stock:
+    put:
+      operationId: aumentarStockProducto
+      summary: "params: {id: int, cantidad: int}"
+      x-google-backend:
+        address: https://serverlest-topicos-gateway-8zoia048.uc.gateway.dev/aumentar_stock
+      responses:
+        '200':
+          description: OK
+          
+  /inventario/disminuir_stock:
+    put:
+      operationId: disminuirStockProducto
+      summary: "params: {id: int, cantidad: int}"
+      x-google-backend:
+        address: https://serverlest-topicos-gateway-8zoia048.uc.gateway.dev/disminuir_stock
+      responses:
+        '200':
+          description: OK      
+
+  /venta/crear:
+    post:
+      operationId: crearVenta
+      summary: "params: {id_usuario: int, total: number}"
+      x-google-backend:
+        address: https://serverlest-topicos-gateway-8zoia048.uc.gateway.dev/crear_venta
+      responses:
+        '200':
+          description: OK
+
+  /venta/crear_detalle_venta:
+    put:
+      operationId: crearDetalleVenta
+      summary: "params: {id_venta: int, id_producto: int, cantidad: int, subtotal: number}"
+      x-google-backend:
+        address: https://serverlest-topicos-gateway-8zoia048.uc.gateway.dev/crear_detalle_venta
+      responses:
+        '200':
+          description: OK          
+  
+  /venta/anular_detalle_venta:
+    put:
+      operationId: anularDetalleVenta
+      summary: "params: {id_detalle_venta: int}"
+      x-google-backend:
+        address: https://serverlest-topicos-gateway-8zoia048.uc.gateway.dev/anular_detalle_venta
+      responses:
+        '200':
+          description: OK

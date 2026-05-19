@@ -1,0 +1,24 @@
+root   ::= "[" (object ("," object)*)? "]"
+object ::= "{" ws object_content "}"
+
+# Estructura base obligatoria para el ruteo
+object_content ::= 
+  "\"module\":" ws string "," ws
+  "\"operation\":" ws string "," ws
+  "\"method\":" ws string "," ws
+  "\"endpoint\":" ws string "," ws
+  "\"data\":" ws data_payload
+
+# Payload de datos con soporte para opcionalidad total
+data_payload ::= "null" | dict
+
+# El diccionario permite 0 o N campos, soportando entradas parciales de NLP
+dict   ::= "{" ws (kv ("," ws kv)*)? ws "}"
+kv     ::= string ":" ws value
+
+value  ::= string | number | dict | list | "true" | "false" | "null"
+list   ::= "[" ws (value ("," ws value)*)? ws "]"
+
+string ::= "\"" ([^"\\] | "\\" ["\\/bfnrt] | "\\u" [0-9a-fA-F] [0-9a-fA-F] [0-9a-fA-F] [0-9a-fA-F])* "\""
+number ::= "-"? ([0-9] | [1-9] [0-9]*) ("." [0-9]+)? ([eE] [+-]? [0-9]+)?
+ws     ::= [ \t\n\r]*
